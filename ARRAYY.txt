@@ -1,0 +1,177 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define MAX_SONGS 100
+#define MAX_NAME_LEN 100
+
+char playlist[MAX_SONGS][MAX_NAME_LEN];
+int songCount = 0;
+int currentIndex = -1;
+
+void addSong(char* songName) {
+    if (songCount >= MAX_SONGS) {
+        printf("Playlist is full! Cannot add more songs.\n");
+        return;
+    }
+    strcpy(playlist[songCount], songName);
+    songCount++;
+    if (currentIndex == -1) currentIndex = 0;
+    printf("Added: %s\n", songName);
+}
+
+void deleteSong(char* songName) {
+    int found = 0;
+    for (int i = 0; i < songCount; i++) {
+        if (strcmp(playlist[i], songName) == 0) {
+            found = 1;
+            for (int j = i; j < songCount - 1; j++) {
+                strcpy(playlist[j], playlist[j + 1]);
+            }
+            songCount--;
+            printf("Deleted: %s\n", songName);
+            if (songCount == 0) currentIndex = -1;
+            else if (currentIndex >= songCount) currentIndex = 0;
+            break;
+        }
+    }
+    if (!found) {
+        printf("Song not found!\n");
+    }
+}
+
+void displayPlaylist() {
+    if (songCount == 0) {
+        printf("Playlist is empty!\n");
+        return;
+    }
+    printf("\nPlaylist:\n");
+    for (int i = 0; i < songCount; i++) {
+        printf(" - %s\n", playlist[i]);
+    }
+}
+
+void playNext() {
+    if (songCount == 0) {
+        printf("Playlist is empty!\n");
+        return;
+    }
+    currentIndex = (currentIndex + 1) % songCount;
+    printf("Now Playing: %s\n", playlist[currentIndex]);
+}
+
+void currentSong() {
+    if (songCount == 0 || currentIndex == -1) {
+        printf("No song is currently playing.\n");
+        return;
+    }
+    printf("Currently Playing: %s\n", playlist[currentIndex]);
+}
+
+void countSongs() {
+    printf("Total number of songs: %d\n", songCount);
+}
+
+void searchSong(char* name) {
+    for (int i = 0; i < songCount; i++) {
+        if (strcmp(playlist[i], name) == 0) {
+            printf("Found '%s' at position %d\n", name, i + 1);
+            return;
+        }
+    }
+    printf("Song '%s' not found in the playlist.\n", name);
+}
+
+void clearPlaylist() {
+    songCount = 0;
+    currentIndex = -1;
+    printf("All songs have been deleted. Playlist cleared.\n");
+}
+
+void shufflePlay() {
+    if (songCount == 0) {
+        printf("Playlist is empty!\n");
+        return;
+    }
+    currentIndex = rand() % songCount;
+    printf("Shuffled Play: Now Playing: %s\n", playlist[currentIndex]);
+}
+
+int main() {
+    int choice;
+    char songName[MAX_NAME_LEN];
+    srand(time(NULL)); // For shuffle
+
+    do {
+        printf("\nMusic Playlist Manager\n");
+        printf("1. Add Song(s)\n");
+        printf("2. Delete Song\n");
+        printf("3. Display Playlist\n");
+        printf("4. Play Next Song\n");
+        printf("5. Current Song\n");
+        printf("6. Count Songs\n");
+        printf("7. Search Song\n");
+        printf("8. Shuffle Play\n");
+        printf("9. Clear Playlist\n");
+        printf("10. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+        getchar(); // consume newline
+
+        switch (choice) {
+            case 1: {
+                int count;
+                printf("How many songs do you want to add? ");
+                scanf("%d", &count);
+                getchar(); // consume newline
+                for (int i = 0; i < count; i++) {
+                    printf("Enter song %d name: ", i + 1);
+                    fgets(songName, MAX_NAME_LEN, stdin);
+                    songName[strcspn(songName, "\n")] = '\0';
+                    addSong(songName);
+                }
+                break;
+            }
+            case 2:
+                printf("Enter song name to delete: ");
+                fgets(songName, MAX_NAME_LEN, stdin);
+                songName[strcspn(songName, "\n")] = '\0';
+                deleteSong(songName);
+                break;
+            case 3:
+                displayPlaylist();
+                break;
+            case 4:
+                playNext();
+                break;
+            case 5:
+                currentSong();
+                break;
+            case 6:
+                countSongs();
+                break;
+            case 7:
+                printf("Enter song name to search: ");
+                fgets(songName, MAX_NAME_LEN, stdin);
+                songName[strcspn(songName, "\n")] = '\0';
+                searchSong(songName);
+                break;
+            case 8:
+                shufflePlay();
+                break;
+            case 9:
+                clearPlaylist();
+                break;
+            case 10:
+                printf("Exiting...\n");
+                clearPlaylist();
+                break;
+            default:
+                printf("Invalid choice! Try again.\n");
+        }
+
+    } while (choice != 10);
+
+    return 0;
+}
